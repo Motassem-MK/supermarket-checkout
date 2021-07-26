@@ -106,7 +106,7 @@ class CheckoutScanTest extends TestCase
     {
         $product1 = Product::factory()->create(['price' => 50]);
         $product2 = Product::factory()
-            ->withOffer(Offer::TYPE_QUANTITY_DISCOUNT, [2 => 100])
+            ->withOffer(Offer::TYPE_QUANTITY_SPECIAL_PRICE, [2 => 100])
             ->create(['price' => 75]);
 
         $cart = Cart::create();
@@ -137,10 +137,10 @@ class CheckoutScanTest extends TestCase
     public function it_should_calculate_total_when_one_applicable_offer_on_multiple_products()
     {
         $product1 = Product::factory()
-            ->withOffer(Offer::TYPE_QUANTITY_DISCOUNT, [2 => 80])
+            ->withOffer(Offer::TYPE_QUANTITY_SPECIAL_PRICE, [2 => 80])
             ->create(['price' => 50]);
         $product2 = Product::factory()
-            ->withOffer(Offer::TYPE_QUANTITY_DISCOUNT, [3 => 150])
+            ->withOffer(Offer::TYPE_QUANTITY_SPECIAL_PRICE, [3 => 150])
             ->create(['price' => 75]);
 
         $cart = new Cart();
@@ -173,7 +173,7 @@ class CheckoutScanTest extends TestCase
     {
         $product1 = Product::factory()->create(['price' => 50]);
         $product2 = Product::factory()
-            ->withOffer(Offer::TYPE_QUANTITY_DISCOUNT, [2 => 100, 4 => 175])
+            ->withOffer(Offer::TYPE_QUANTITY_SPECIAL_PRICE, [2 => 100, 4 => 175])
             ->create(['price' => 75]);
 
         $cart = Cart::create();
@@ -205,7 +205,7 @@ class CheckoutScanTest extends TestCase
     {
         $product1 = Product::factory()->create(['price' => 50]);
         $product2 = Product::factory()
-            ->withOffer(Offer::TYPE_QUANTITY_DISCOUNT, [2 => 100])
+            ->withOffer(Offer::TYPE_QUANTITY_SPECIAL_PRICE, [2 => 100])
             ->create(['price' => 75]);
 
         $cart = Cart::create();

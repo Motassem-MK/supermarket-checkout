@@ -10,10 +10,10 @@ class Offer extends Model
 {
     use HasFactory;
 
-    const TYPE_QUANTITY_DISCOUNT = 'quantity_discount';
+    const TYPE_QUANTITY_SPECIAL_PRICE = 'quantity_special_price';
 
     const ALLOWED_TYPES = [
-        self::TYPE_QUANTITY_DISCOUNT,
+        self::TYPE_QUANTITY_SPECIAL_PRICE,
     ];
 
     protected $fillable = [
