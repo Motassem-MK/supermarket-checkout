@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class Cart extends Model
 {
@@ -72,5 +74,28 @@ class Cart extends Model
         return $product_in_cart
             ->pivot
             ->quantity;
+    }
+
+    public function offers(): Collection
+    {
+        return Cache::rememberForever(
+            'CART_' . $this->getKey() . '_OFFERS',
+            fn() => Offer::all()
+        );
+    }
+
+    public function offersFor(int $product_id): Collection
+    {
+        return Cache::tags(['CART_' . $this->getKey() . '_PRODUCT_OFFERS'])
+            ->rememberForever(
+                'CART_' . $this->getKey() . '_PRODUCT_' . $product_id . '_OFFERS',
+                fn() => $this->offers()->filter(fn($offer) => $offer->product_id == $product_id)
+            );
+    }
+
+    private function flushOffersCache(): void
+    {
+        Cache::forget('CART_' . $this->getKey() . '_OFFERS');
+        Cache::tags(['CART_' . $this->getKey() . '_PRODUCT_OFFERS'])->flush();
     }
 }

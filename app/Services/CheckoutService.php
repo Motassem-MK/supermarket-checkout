@@ -42,10 +42,12 @@ class CheckoutService
     {
         $this->cart->discount = 0;
         $this->cart->products->each(
-            fn($product) => $product->offers->each(
-                fn($offer) => resolve($offer->getStrategyFQCN())
-                    ->applyOffer($this->cart, $product, $product->pivot->quantity, $offer->parameters)
-            )
+            fn($product) => $this->cart
+                ->offersFor($product->id)
+                ->each(
+                    fn($offer) => resolve($offer->getStrategyFQCN())
+                        ->applyOffer($this->cart, $product, $product->pivot->quantity, $offer->parameters)
+                )
         );
     }
 
