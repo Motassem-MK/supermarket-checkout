@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Support\Facades\Log;
 
 class Cart extends Model
 {
@@ -27,5 +26,39 @@ class Cart extends Model
                 'quantity',
                 'unit_price',
             ]);
+    }
+
+    public function updateItem(Product $product, $new_quantity): void
+    {
+        if ($new_quantity == 0) {
+            $this->products()->detach($product->id);
+            return;
+        }
+
+        $this->products()->sync([
+            $product->id => [
+                'quantity' => $new_quantity,
+                'unit_price' => $product->price,
+            ]
+        ], false);
+
+        $this->refresh();
+    }
+
+    public function getQuantity(Product $product): int
+    {
+        $cart_has_products = $this->products->count() > 0;
+        if (!$cart_has_products) {
+            return 0;
+        }
+
+        $product_in_cart = $this->products->firstWhere('id', $product->id);
+        if (!$product_in_cart) {
+            return 0;
+        }
+
+        return $product_in_cart
+            ->pivot
+            ->quantity;
     }
 }
