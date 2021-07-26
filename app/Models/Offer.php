@@ -25,4 +25,11 @@ class Offer extends Model
     protected $casts = [
         'parameters' => 'json'
     ];
+
+    public function getStrategyFQCN(): string
+    {
+        $class_name = ucfirst(Str::camel($this->type));
+
+        return "App\Strategies\Offers\\${class_name}Strategy";
+    }
 }
