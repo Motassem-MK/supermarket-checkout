@@ -9,9 +9,13 @@ use Illuminate\Support\Facades\Log;
 
 class CheckoutService
 {
-    public function __construct(private Cart $cart)
-    {
+    private Cart $cart;
 
+    public function setCart(Cart $cart): static
+    {
+        $this->cart = $cart;
+
+        return $this;
     }
 
     public function add(Product $product, int $added_quantity)
@@ -36,7 +40,13 @@ class CheckoutService
 
     private function applyOffers()
     {
-
+        $this->cart->discount = 0;
+        $this->cart->products->each(
+            fn($product) => $product->offers->each(
+                fn($offer) => resolve($offer->getStrategyFQCN())
+                    ->applyOffer($this->cart, $product, $product->pivot->quantity, $offer->parameters)
+            )
+        );
     }
 
     private function updateTotal()
