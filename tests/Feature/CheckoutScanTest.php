@@ -12,7 +12,8 @@ class CheckoutScanTest extends TestCase
 {
     use RefreshDatabase;
 
-    private string $endpoint = '/api/checkout/scan';
+    private string $add_endpoint = '/api/checkout/add';
+    private string $remove_endpoint = '/api/checkout/remove';
 
     private string $productsTableName = 'products';
     private string $cartsTableName = 'carts';
@@ -30,7 +31,7 @@ class CheckoutScanTest extends TestCase
             'quantity' => $quantity
         ];
 
-        $response = $this->post($this->endpoint, $payload);
+        $response = $this->post($this->add_endpoint, $payload);
 
         $response->assertOk();
         $this->assertDatabaseCount($this->cartsTableName, 1);
@@ -62,7 +63,7 @@ class CheckoutScanTest extends TestCase
             'quantity' => 2
         ];
 
-        $response = $this->post($this->endpoint, $payload);
+        $response = $this->post($this->add_endpoint, $payload);
 
         $response->assertOk();
         $this->assertDatabaseCount($this->cartsTableName, 1);
@@ -72,7 +73,7 @@ class CheckoutScanTest extends TestCase
     /**
      * @test
      */
-    public function it_should_calculate_total_when_no_applicable_offers()
+    public function it_should_calculate_total_on_add_when_no_applicable_offers()
     {
         $product1 = Product::factory()->create(['price' => 50]);
         $product2 = Product::factory()->create(['price' => 75]);
@@ -91,7 +92,7 @@ class CheckoutScanTest extends TestCase
             'quantity' => 2
         ];
 
-        $response = $this->postJson($this->endpoint, $payload);
+        $response = $this->postJson($this->add_endpoint, $payload);
 
         $response->assertOk();
         $response->assertJson([
@@ -102,7 +103,7 @@ class CheckoutScanTest extends TestCase
     /**
      * @test
      */
-    public function it_should_calculate_total_when_one_applicable_offer()
+    public function it_should_calculate_total_on_add_when_one_applicable_offer()
     {
         $product1 = Product::factory()->create(['price' => 50]);
         $product2 = Product::factory()
@@ -123,7 +124,7 @@ class CheckoutScanTest extends TestCase
             'quantity' => 2
         ];
 
-        $response = $this->postJson($this->endpoint, $payload);
+        $response = $this->postJson($this->add_endpoint, $payload);
 
         $response->assertOk();
         $response->assertJson([
@@ -134,7 +135,7 @@ class CheckoutScanTest extends TestCase
     /**
      * @test
      */
-    public function it_should_calculate_total_when_one_applicable_offer_on_multiple_products()
+    public function it_should_calculate_total_on_add_when_one_applicable_offer_on_multiple_products()
     {
         $product1 = Product::factory()
             ->withOffer(Offer::TYPE_QUANTITY_SPECIAL_PRICE, [2 => 80])
@@ -158,7 +159,7 @@ class CheckoutScanTest extends TestCase
             'quantity' => 4
         ];
 
-        $response = $this->postJson($this->endpoint, $payload);
+        $response = $this->postJson($this->add_endpoint, $payload);
 
         $response->assertOk();
         $response->assertJson([
@@ -169,7 +170,7 @@ class CheckoutScanTest extends TestCase
     /**
      * @test
      */
-    public function it_should_calculate_total_when_multiple_applicable_offers_on_same_product()
+    public function it_should_calculate_total_on_add_when_multiple_applicable_offers_on_same_product()
     {
         $product1 = Product::factory()->create(['price' => 50]);
         $product2 = Product::factory()
@@ -190,7 +191,7 @@ class CheckoutScanTest extends TestCase
             'quantity' => 7
         ];
 
-        $response = $this->postJson($this->endpoint, $payload);
+        $response = $this->postJson($this->add_endpoint, $payload);
 
         $response->assertOk();
         $response->assertJson([
@@ -201,7 +202,7 @@ class CheckoutScanTest extends TestCase
     /**
      * @test
      */
-    public function it_should_calculate_total_when_one_offer_applicable_multiple_times()
+    public function it_should_calculate_total_on_add_when_one_offer_applicable_multiple_times()
     {
         $product1 = Product::factory()->create(['price' => 50]);
         $product2 = Product::factory()
@@ -222,11 +223,47 @@ class CheckoutScanTest extends TestCase
             'quantity' => 7
         ];
 
-        $response = $this->postJson($this->endpoint, $payload);
+        $response = $this->postJson($this->add_endpoint, $payload);
 
         $response->assertOk();
         $response->assertJson([
             'payable' => 425
+        ]);
+    }
+
+    /**
+     * @test
+     */
+    public function it_should_calculate_total_on_delete_when_one_applicable_offer()
+    {
+        $product1 = Product::factory()->create(['price' => 50]);
+        $product2 = Product::factory()
+            ->withOffer(Offer::TYPE_QUANTITY_SPECIAL_PRICE, [2 => 100])
+            ->create(['price' => 75]);
+
+        $cart = Cart::create();
+        $cart->products()->attach([
+            $product1->id => [
+                'quantity' => 1,
+                'unit_price' => $product1->price,
+            ],
+            $product2->id => [
+                'quantity' => 3,
+                'unit_price' => $product2->price
+            ]
+        ]);
+
+        $payload = [
+            'cart_id' => $cart->id,
+            'product_id' => $product2->id,
+            'quantity' => 1
+        ];
+
+        $response = $this->postJson($this->remove_endpoint, $payload);
+
+        $response->assertOk();
+        $response->assertJson([
+            'payable' => 150
         ]);
     }
 }

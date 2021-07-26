@@ -18,17 +18,12 @@ class Cart extends Model
 
     protected $with = ['products'];
 
-    public static function findOrPrepare(int $id = null)
+    public static function prepare(int $id = null)
     {
         if ($id) {
             return self::find($id);
         }
 
-        return self::prepare();
-    }
-
-    private static function prepare(): Cart
-    {
         $instance = self::create();
         // TODO cache offers to $instance->id
 

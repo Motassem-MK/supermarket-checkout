@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Checkout;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CheckoutScanRequest extends FormRequest
+class CheckoutAddRequest extends FormRequest
 {
     public function rules()
     {
