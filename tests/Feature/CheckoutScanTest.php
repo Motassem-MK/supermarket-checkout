@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Cart;
+use App\Models\Offer;
 use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -95,6 +96,137 @@ class CheckoutScanTest extends TestCase
         $response->assertOk();
         $response->assertJson([
             'payable' => 200
+        ]);
+    }
+
+    /**
+     * @test
+     */
+    public function it_should_calculate_total_when_one_applicable_offer()
+    {
+        $product1 = Product::factory()->create(['price' => 50]);
+        $product2 = Product::factory()
+            ->withOffer(Offer::TYPE_QUANTITY_DISCOUNT, [2 => 100])
+            ->create(['price' => 75]);
+
+        $cart = Cart::create();
+        $cart->products()->attach([
+            $product1->id => [
+                'quantity' => 1,
+                'unit_price' => $product1->price,
+            ]
+        ]);
+
+        $payload = [
+            'cart_id' => $cart->id,
+            'product_id' => $product2->id,
+            'quantity' => 2
+        ];
+
+        $response = $this->postJson($this->endpoint, $payload);
+
+        $response->assertOk();
+        $response->assertJson([
+            'payable' => 150
+        ]);
+    }
+
+    /**
+     * @test
+     */
+    public function it_should_calculate_total_when_one_applicable_offer_on_multiple_products()
+    {
+        $product1 = Product::factory()
+            ->withOffer(Offer::TYPE_QUANTITY_DISCOUNT, [2 => 80])
+            ->create(['price' => 50]);
+        $product2 = Product::factory()
+            ->withOffer(Offer::TYPE_QUANTITY_DISCOUNT, [3 => 150])
+            ->create(['price' => 75]);
+
+        $cart = new Cart();
+        $cart->save();
+        $cart->products()->attach([
+            $product1->id => [
+                'quantity' => 3,
+                'unit_price' => $product1->price,
+            ]
+        ]);
+
+        $payload = [
+            'cart_id' => $cart->id,
+            'product_id' => $product2->id,
+            'quantity' => 4
+        ];
+
+        $response = $this->postJson($this->endpoint, $payload);
+
+        $response->assertOk();
+        $response->assertJson([
+            'payable' => 355
+        ]);
+    }
+
+    /**
+     * @test
+     */
+    public function it_should_calculate_total_when_multiple_applicable_offers_on_same_product()
+    {
+        $product1 = Product::factory()->create(['price' => 50]);
+        $product2 = Product::factory()
+            ->withOffer(Offer::TYPE_QUANTITY_DISCOUNT, [2 => 100, 4 => 175])
+            ->create(['price' => 75]);
+
+        $cart = Cart::create();
+        $cart->products()->attach([
+            $product1->id => [
+                'quantity' => 1,
+                'unit_price' => $product1->price,
+            ]
+        ]);
+
+        $payload = [
+            'cart_id' => $cart->id,
+            'product_id' => $product2->id,
+            'quantity' => 7
+        ];
+
+        $response = $this->postJson($this->endpoint, $payload);
+
+        $response->assertOk();
+        $response->assertJson([
+            'payable' => 400
+        ]);
+    }
+
+    /**
+     * @test
+     */
+    public function it_should_calculate_total_when_one_offer_applicable_multiple_times()
+    {
+        $product1 = Product::factory()->create(['price' => 50]);
+        $product2 = Product::factory()
+            ->withOffer(Offer::TYPE_QUANTITY_DISCOUNT, [2 => 100])
+            ->create(['price' => 75]);
+
+        $cart = Cart::create();
+        $cart->products()->attach([
+            $product1->id => [
+                'quantity' => 1,
+                'unit_price' => $product1->price,
+            ]
+        ]);
+
+        $payload = [
+            'cart_id' => $cart->id,
+            'product_id' => $product2->id,
+            'quantity' => 7
+        ];
+
+        $response = $this->postJson($this->endpoint, $payload);
+
+        $response->assertOk();
+        $response->assertJson([
+            'payable' => 425
         ]);
     }
 }
