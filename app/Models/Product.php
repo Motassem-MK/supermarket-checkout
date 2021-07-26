@@ -23,4 +23,9 @@ class Product extends Model
     {
         $this->attributes['price'] = $price * 100;
     }
+
+    public function offers()
+    {
+        return $this->hasMany(Offer::class);
+    }
 }
