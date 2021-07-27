@@ -17,7 +17,7 @@ A system that handles the checkout process for supermarkets and is extensible to
 - For the development environment, you may want to seed the database, run `sail artisan migrate:fresh --seed`
 
 ## Testing
-The project was built using TDD practices, To run all tests: `./vendor/bin/sail artisan test`
+The project was built using TDD practices, To run all tests: `sail artisan test`
 
 ## Usage & Functional features
 There's are two functionality for the system, which are scanning products to be:
