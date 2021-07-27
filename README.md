@@ -34,15 +34,17 @@ There are two main criteria in the system that need to be flexible,
 - **Storage engine** -since it isn't mentioned in the requirements- is easily swappable thanks to centralizing database calls in Repositories, the current implementation is built for MySQL/MariaDB.
 - **Offers' logic** -as supermarkets provide different kind of offers- is open to extension
   - Offers calculations are isolated in Strategies, we can easily add offers without modifying the code base, instead only adding a strategy class for it.
-  - The logic of offers is vastly flexible, offers of a specific product can optionally access that product, other products in cart, cart's information, and even the other applied offers.
+  - The logic of offers is vastly flexible, offers of a specific product can optionally access that product, other products in cart, cart's information, and even the other valid offers.
   - Multiple offers can easily work side by side, or applied multiple times on the same product, since their responsibility is to optionally increase the cart's discount, so, also, if an offer does not provide a discount (maybe instead, the customer wins DevolonCoin?) that's also possible.
     
 ### Scalability
 - The use of caching on offers (of carts) allows the system to handle many offers without affecting performance.
+- Adding another layer of caching for applied offers to avoid going through cached offers for filtering repeatedly.
 - Cached entries can be flushed when there's no further use for them.
 
 ### Fault-Tolerance
 - Caching service failure, which leads to losing in that case the system picks the offers up from db and caches them again.
+- Atomic transactions used on all methods that has multiple-queries to avoid having corrupt data.
 
 ## Business Requirements
 ### Operation Friendliness
@@ -56,6 +58,7 @@ The offer type mentioned in the requirement is implemented a logic that can be s
 _apply all rules of all offers applicable to the product's quantity, with priority to the highest rule, and allows the same rule to be repeated as many times as possible._
 
 So the steps go down as follows:
+
 ![Alt text](readme_assets/quantity_special_price.png "Quantity Special Price Diagram")
 
 
