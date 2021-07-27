@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Repositories\BaseRepositoryInterface;
 use App\Repositories\CartRepositoryInterface;
+use App\Repositories\Eloquent\BaseRepository;
 use App\Repositories\Eloquent\CartRepository;
 use App\Repositories\Eloquent\ProductRepository;
 use App\Repositories\ProductRepositoryInterface;
@@ -17,6 +19,7 @@ class RepositoryServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->app->bind(BaseRepositoryInterface::class, BaseRepository::class);
         $this->app->bind(CartRepositoryInterface::class, CartRepository::class);
         $this->app->bind(ProductRepositoryInterface::class, ProductRepository::class);
     }
