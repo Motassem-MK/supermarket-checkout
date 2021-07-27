@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\MoneyCast;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -16,6 +17,12 @@ class Cart extends Model
         'total',
         'discount',
         'payable'
+    ];
+
+    protected $casts = [
+        'total' => MoneyCast::class,
+        'discount' => MoneyCast::class,
+        'payable' => MoneyCast::class,
     ];
 
     protected $with = ['products'];

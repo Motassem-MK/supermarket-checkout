@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\MoneyCast;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -14,15 +15,9 @@ class Product extends Model
         'price'
     ];
 
-    public function getPriceAttribute($price)
-    {
-        return $price / 100;
-    }
-
-    public function setPriceAttribute($price)
-    {
-        $this->attributes['price'] = $price * 100;
-    }
+    protected $casts = [
+        'price' => MoneyCast::class
+    ];
 
     public function offers()
     {
