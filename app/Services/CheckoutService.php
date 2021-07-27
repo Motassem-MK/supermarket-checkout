@@ -4,12 +4,15 @@ namespace App\Services;
 
 use App\Models\Cart;
 use App\Models\Product;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
+use App\Repositories\CartRepositoryInterface;
 
 class CheckoutService
 {
     private Cart $cart;
+
+    public function __construct(private CartRepositoryInterface $cartRepository)
+    {
+    }
 
     public function setCart(Cart $cart): static
     {
@@ -20,19 +23,19 @@ class CheckoutService
 
     public function add(Product $product, int $added_quantity)
     {
-        $total_quantity = $this->cart->getQuantity($product) + $added_quantity;
+        $total_quantity = $this->cartRepository->getQuantity($this->cart, $product) + $added_quantity;
         $this->updateCart($product, $total_quantity);
     }
 
     public function remove(Product $product, int $removed_quantity)
     {
-        $total_quantity = $this->cart->getQuantity($product) - $removed_quantity;
+        $total_quantity = $this->cartRepository->getQuantity($this->cart, $product) - $removed_quantity;
         $this->updateCart($product, $total_quantity);
     }
 
     private function updateCart(Product $product, int $total_quantity)
     {
-        $this->cart->updateItem($product, $total_quantity);
+        $this->cartRepository->updateItem($this->cart, $product, $total_quantity);
         $this->updateTotal();
         $this->applyOffers();
         $this->updatePayable();
