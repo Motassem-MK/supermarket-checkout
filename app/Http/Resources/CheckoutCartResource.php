@@ -15,6 +15,7 @@ class CheckoutCartResource extends JsonResource
     public function toArray($request)
     {
         return [
+            'id' => $this->id,
             'total' => $this->total,
             'discount' => $this->discount,
             'payable' => $this->payable,
